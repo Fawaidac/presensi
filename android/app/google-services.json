@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1025030838159",
+    "project_id": "presensi-aceb6",
+    "storage_bucket": "presensi-aceb6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1025030838159:android:a0cfc6f9a2e87d46d1ddfa",
+        "android_client_info": {
+          "package_name": "com.apps.presensi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCugT1dI29ZKM6YIBlHfxOO1ew0tHqfzn4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
