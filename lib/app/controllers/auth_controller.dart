@@ -1,11 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
-import 'package:presensi/app/exceptions/failure_exception.dart';
+import 'package:presensi/app/controllers/user_controller.dart';
 import 'package:presensi/app/routes/app_pages.dart';
+import 'package:presensi/model/user.dart';
 
 class AuthController extends GetxController {
   final auth = FirebaseAuth.instance;
   late final Rx<User?> authUser;
+  final userController = Get.put(UserController());
 
   @override
   void onReady() {
@@ -17,9 +19,8 @@ class AuthController extends GetxController {
   }
 
   setInitial(User user) {
-    user == null
-        ? Get.offAllNamed(Routes.WELLCOME)
-        : Get.offAllNamed(Routes.HOME);
+    // ignore: unnecessary_null_comparison
+    user == null ? Get.offAllNamed(Routes.LOGIN) : Get.offAllNamed(Routes.HOME);
   }
 
   Future<void> signInWithEmailAndPassword(String email, password) async {
@@ -27,27 +28,31 @@ class AuthController extends GetxController {
       await auth.signInWithEmailAndPassword(email: email, password: password);
       authUser.value != null
           ? Get.offAllNamed(Routes.HOME)
-          : Get.offAllNamed(Routes.WELLCOME);
+          : Get.offAllNamed(Routes.LOGIN);
+      Get.snackbar("Success", "successfully log in to the app");
     } on FirebaseAuthException catch (e) {
-      final ex = FailureException.code(e.code);
-      Get.snackbar("Error", ex.msg);
-    } catch (e) {
-      const ex = FailureException();
-      Get.snackbar("Sign-In Error", ex.msg);
+      if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+        Get.snackbar("Error", "Invalid email or password");
+      } else {
+        Get.snackbar("Error", "An error occurred: ${e.code}");
+      }
     }
   }
 
-  Future<void> signUpWithEmailAndPassword(String email, password) async {
+  Future<void> signUpWithEmailAndPassword(
+      String email, String fullname, String password, String telp) async {
     try {
       await auth.createUserWithEmailAndPassword(
           email: email, password: password);
-      Get.snackbar("Sign-Up Success", "Registration successful");
+      await userController.createUser(UserModel(
+          fullname: fullname, email: email, telp: telp, password: password));
+      Get.toNamed(Routes.LOGIN);
     } on FirebaseAuthException catch (e) {
-      final ex = FailureException.code(e.code);
-      Get.snackbar("Error", ex.msg);
-    } catch (e) {
-      const ex = FailureException();
-      Get.snackbar("Sign-Un Error", ex.msg);
+      if (e.code == 'email-already-in-use') {
+        Get.snackbar("Error", "The email address is already in use");
+      } else {
+        Get.snackbar("Error", "An error occurred: ${e.code}");
+      }
     }
   }
 
