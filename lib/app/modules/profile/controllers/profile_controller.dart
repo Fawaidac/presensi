@@ -1,23 +1,17 @@
 import 'package:get/get.dart';
+import 'package:presensi/app/controllers/auth_controller.dart';
+import 'package:presensi/app/controllers/user_controller.dart';
 
 class ProfileController extends GetxController {
-  //TODO: Implement ProfileController
+  final authController = Get.put(AuthController());
+  final userController = Get.put(UserController());
 
-  final count = 0.obs;
-  @override
-  void onInit() {
-    super.onInit();
+  getUserData() {
+    final email = authController.authUser.value?.email;
+    if (email != null) {
+      return userController.getUserDetail(email);
+    } else {
+      print("Error get data user email not found");
+    }
   }
-
-  @override
-  void onReady() {
-    super.onReady();
-  }
-
-  @override
-  void onClose() {
-    super.onClose();
-  }
-
-  void increment() => count.value++;
 }

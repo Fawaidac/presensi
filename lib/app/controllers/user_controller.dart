@@ -14,4 +14,11 @@ class UserController extends GetxController {
       print("Error creating user: $error");
     }
   }
+
+  Future<UserModel> getUserDetail(String email) async {
+    final snapshot =
+        await _db.collection("Users").where("email", isEqualTo: email).get();
+    final userData = snapshot.docs.map((e) => UserModel.fromSnapshot(e)).single;
+    return userData;
+  }
 }

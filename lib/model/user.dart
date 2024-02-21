@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class UserModel {
   final String? id;
   final String fullname;
@@ -20,5 +22,15 @@ class UserModel {
       'password': password,
       'telp': telp
     };
+  }
+
+  factory UserModel.fromSnapshot(DocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data()!;
+    return UserModel(
+        id: doc.id,
+        fullname: data['fullname'],
+        email: data['email'],
+        telp: data['telp'],
+        password: data['password']);
   }
 }

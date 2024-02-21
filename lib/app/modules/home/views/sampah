@@ -1,0 +1,50 @@
+// Container(
+//                 color: Colors.grey,
+//                 height: 500,
+//                 margin: const EdgeInsets.symmetric(vertical: 15),
+//                 width: MediaQuery.of(context).size.width,
+//                 child: locationData != null || currentP != null
+//                     ? GoogleMap(
+//                         onMapCreated: ((GoogleMapController controller) =>
+//                             mapController.complete(controller)),
+//                         initialCameraPosition: CameraPosition(
+//                             target: LatLng(
+//                               locationData!.latitude!,
+//                               locationData!.longitude!,
+//                             ),
+//                             zoom: 13),
+//                         markers: {
+//                           if (currentP != null)
+//                             Marker(
+//                               markerId: const MarkerId("current"),
+//                               icon: BitmapDescriptor.defaultMarker,
+//                               infoWindow:
+//                                   InfoWindow(title: "Your Current Location"),
+//                               position: currentP!,
+//                             ),
+//                           Marker(
+//                             markerId: const MarkerId("source"),
+//                             icon: BitmapDescriptor.defaultMarker,
+//                             infoWindow:
+//                                 InfoWindow(title: "Your Starting Location"),
+//                             position: LatLng(
+//                               locationData!.latitude!,
+//                               locationData!.longitude!,
+//                             ),
+//                           ),
+//                           if (dLoc != null)
+//                             Marker(
+//                                 markerId: const MarkerId("destination"),
+//                                 icon: BitmapDescriptor.defaultMarker,
+//                                 infoWindow: InfoWindow(
+//                                     title: "Your Destination Location"),
+//                                 position:
+//                                     LatLng(dLoc!.latitude, dLoc!.longitude))
+//                         },
+//                         // polylines: dLoc != null ? Set<Polyline>.of(polylines.values) : Set<Polyline>.of(null) ,
+//                       )
+//                     : const Center(
+//                         child: CircularProgressIndicator(
+//                           color: Colors.indigo,
+//                         ),
+//                       )),

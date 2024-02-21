@@ -120,7 +120,7 @@ class RegisterView extends GetView<RegisterController> {
                 child: TextFormField(
                   controller: telp,
                   style: AppFonts.poppins(fontSize: 12, color: blackColor),
-                  keyboardType: TextInputType.name,
+                  keyboardType: TextInputType.number,
                   enabled: true,
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
