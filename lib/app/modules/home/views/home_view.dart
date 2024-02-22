@@ -62,62 +62,7 @@ class _HomeViewState extends State<HomeView> {
           actions: [
             IconButton(
                 onPressed: () {
-                  showMenu(
-                      context: context,
-                      position: RelativeRect.fromLTRB(
-                          MediaQuery.of(context).size.width - 50, // right
-                          50,
-                          0,
-                          0),
-                      items: [
-                        PopupMenuItem<int>(
-                            value: 0,
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.account_box_rounded,
-                                  color: blackColor,
-                                  size: 20,
-                                ),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  "My Profile",
-                                  style: AppFonts.poppins(
-                                      fontSize: 12, color: blackColor),
-                                ),
-                              ],
-                            )),
-                        PopupMenuItem<int>(
-                            value: 1,
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.logout_rounded,
-                                  color: blackColor,
-                                  size: 20,
-                                ),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  "Sign Out",
-                                  style: AppFonts.poppins(
-                                      fontSize: 12, color: blackColor),
-                                ),
-                              ],
-                            )),
-                      ]).then((value) {
-                    if (value != null) {
-                      if (value == 1) {
-                        FirebaseAuth.instance.signOut();
-                        Get.offAllNamed(Routes.LOGIN);
-                      } else {
-                        Get.toNamed(Routes.PROFILE);
-                      }
-                    }
-                  });
+                  showPopupMenu(context);
                 },
                 icon: Icon(
                   Icons.more_vert,
@@ -334,6 +279,28 @@ class _HomeViewState extends State<HomeView> {
                           setState(() {
                             dLoc = latLng;
                           });
+
+                          var url = Uri.parse(
+                              'http://router.project-osrm.org/route/v1/driving/${locationData!.longitude},${locationData!.latitude};${dLoc!.longitude},${dLoc!.latitude}?steps=true&annotations=true&geometries=geojson&overview=full');
+                          var response = await http.get(url);
+
+                          print("response api : ${response.body}");
+                          setState(() {
+                            routpoints = [];
+                            var route = jsonDecode(response.body)['routes'][0]
+                                ['geometry']['coordinates'];
+                            for (int i = 0; i < route.length; i++) {
+                              var reep = route[i].toString();
+                              reep = reep.replaceAll("[", "");
+                              reep = reep.replaceAll("]", "");
+                              var lat1 = reep.split(',');
+                              var long1 = reep.split(",");
+                              routpoints.add(ll.LatLng(double.parse(lat1[1]),
+                                  double.parse(long1[0])));
+                            }
+                            isVisible = !isVisible;
+                            print("routes point : $routpoints");
+                          });
                         }
                       },
                       child: Container(
@@ -379,7 +346,7 @@ class _HomeViewState extends State<HomeView> {
                                     child: ListTile(
                                       onTap: () async {
                                         Get.snackbar(
-                                            "Success",
+                                            "Success get location",
                                             controller.listSource[index].point
                                                 .toString());
                                         var geo =
@@ -391,6 +358,7 @@ class _HomeViewState extends State<HomeView> {
                                           controller.listSource.clear();
                                           search.clear();
                                         });
+
                                         var url = Uri.parse(
                                             'http://router.project-osrm.org/route/v1/driving/${locationData!.longitude},${locationData!.latitude};${dLoc!.longitude},${dLoc!.latitude}?steps=true&annotations=true&geometries=geojson&overview=full');
                                         var response = await http.get(url);
@@ -638,9 +606,6 @@ class _HomeViewState extends State<HomeView> {
       if (currLoc.latitude != null && currLoc.longitude != null) {
         setState(() {
           currentP = LatLng(currLoc.latitude!, currLoc.longitude!);
-          print("current : $currentP");
-          print("locationData : $locationData");
-          print("dLoc : $dLoc");
           cameraToPosition(currentP!);
         });
       }
@@ -683,6 +648,63 @@ class _HomeViewState extends State<HomeView> {
     setState(() {
       polylines[id] = polyline;
       print("oke");
+    });
+  }
+
+  void showPopupMenu(BuildContext context) {
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        MediaQuery.of(context).size.width - 50, // right
+        50,
+        0,
+        0,
+      ),
+      items: [
+        PopupMenuItem<int>(
+          value: 0,
+          child: Row(
+            children: [
+              Icon(
+                Icons.account_box_rounded,
+                color: blackColor,
+                size: 20,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                "My Profile",
+                style: AppFonts.poppins(fontSize: 12, color: blackColor),
+              ),
+            ],
+          ),
+        ),
+        PopupMenuItem<int>(
+          value: 1,
+          child: Row(
+            children: [
+              Icon(
+                Icons.logout_rounded,
+                color: blackColor,
+                size: 20,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                "Sign Out",
+                style: AppFonts.poppins(fontSize: 12, color: blackColor),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ).then((value) {
+      if (value != null) {
+        if (value == 1) {
+          FirebaseAuth.instance.signOut();
+          Get.offAllNamed(Routes.LOGIN);
+        } else {
+          Get.toNamed(Routes.PROFILE);
+        }
+      }
     });
   }
 }
