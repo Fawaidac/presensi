@@ -44,6 +44,10 @@ class ProfileView extends GetView<ProfileController> {
                 if (snapshot.connectionState == ConnectionState.done) {
                   UserModel user = snapshot.data as UserModel;
                   if (snapshot.hasData) {
+                    final email = TextEditingController(text: user.email);
+                    final fullname = TextEditingController(text: user.fullname);
+                    final telp = TextEditingController(text: user.telp);
+                    final password = TextEditingController(text: user.password);
                     return Column(
                       children: [
                         Row(
@@ -86,7 +90,7 @@ class ProfileView extends GetView<ProfileController> {
                           padding: const EdgeInsets.only(top: 30),
                           child: TextFormField(
                             textInputAction: TextInputAction.next,
-                            initialValue: user.email,
+                            controller: email,
                             style: AppFonts.poppins(
                                 fontSize: 12, color: blackColor),
                             keyboardType: TextInputType.emailAddress,
@@ -123,7 +127,7 @@ class ProfileView extends GetView<ProfileController> {
                           padding: const EdgeInsets.only(top: 15),
                           child: TextFormField(
                             textInputAction: TextInputAction.next,
-                            initialValue: user.fullname,
+                            controller: fullname,
                             style: AppFonts.poppins(
                                 fontSize: 12, color: blackColor),
                             keyboardType: TextInputType.name,
@@ -160,7 +164,7 @@ class ProfileView extends GetView<ProfileController> {
                           padding: const EdgeInsets.only(top: 15),
                           child: TextFormField(
                             textInputAction: TextInputAction.next,
-                            initialValue: user.telp,
+                            controller: telp,
                             style: AppFonts.poppins(
                                 fontSize: 12, color: blackColor),
                             keyboardType: TextInputType.number,
@@ -194,12 +198,57 @@ class ProfileView extends GetView<ProfileController> {
                             ),
                           ),
                         ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 15),
+                          child: TextFormField(
+                            textInputAction: TextInputAction.next,
+                            obscureText: true,
+                            controller: password,
+                            style: AppFonts.poppins(
+                                fontSize: 12, color: blackColor),
+                            keyboardType: TextInputType.name,
+                            enabled: true,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.singleLineFormatter,
+                            ],
+                            decoration: InputDecoration(
+                              hintText: "Password",
+                              isDense: true,
+                              suffixIcon: Icon(Icons.key),
+                              hintStyle: AppFonts.poppins(
+                                  fontSize: 12, color: Colors.grey),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                  color: Colors.transparent,
+                                  width: 1,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                  color: Colors.transparent,
+                                  width: 1,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              filled: true,
+                              fillColor: Color(0xffC4C4C4).withOpacity(0.2),
+                            ),
+                          ),
+                        ),
                         Container(
                           margin: const EdgeInsets.only(top: 50),
                           width: double.infinity,
                           height: 48,
                           child: ElevatedButton(
-                              onPressed: () {},
+                              onPressed: () async {
+                                final userData = UserModel(
+                                    fullname: fullname.text.trim(),
+                                    email: email.text.trim(),
+                                    telp: telp.text.trim(),
+                                    password: password.text.trim());
+                                await controller.updateUser(userData);
+                              },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.indigo,
                                 shadowColor: Colors.transparent,

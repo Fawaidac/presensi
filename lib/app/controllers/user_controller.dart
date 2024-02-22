@@ -21,4 +21,8 @@ class UserController extends GetxController {
     final userData = snapshot.docs.map((e) => UserModel.fromSnapshot(e)).single;
     return userData;
   }
+
+  Future<void> updateUserProfile(UserModel userModel) async {
+    await _db.collection("Users").doc(userModel.id).update(userModel.toJson());
+  }
 }
