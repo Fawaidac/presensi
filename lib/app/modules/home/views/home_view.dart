@@ -41,10 +41,6 @@ class _HomeViewState extends State<HomeView> {
     // TODO: implement initState
     super.initState();
     getPermission();
-    getLocationUpdates().then((_) => {
-          getPolylinesPoint()
-              .then((coordinates) => {generatedPolilyneFromPoint(coordinates)})
-        });
   }
 
   @override
@@ -256,6 +252,27 @@ class _HomeViewState extends State<HomeView> {
                           var data = await addressSuggestion(value);
                           if (data.isNotEmpty) {
                             controller.listSource.value = data;
+                            var url = Uri.parse(
+                                'http://router.project-osrm.org/route/v1/driving/${locationData!.longitude},${locationData!.latitude};${dLoc!.longitude},${dLoc!.latitude}?steps=true&annotations=true&geometries=geojson&overview=full');
+                            var response = await http.get(url);
+
+                            print("response api : ${response.body}");
+                            setState(() {
+                              routpoints = [];
+                              var route = jsonDecode(response.body)['routes'][0]
+                                  ['geometry']['coordinates'];
+                              for (int i = 0; i < route.length; i++) {
+                                var reep = route[i].toString();
+                                reep = reep.replaceAll("[", "");
+                                reep = reep.replaceAll("]", "");
+                                var lat1 = reep.split(',');
+                                var long1 = reep.split(",");
+                                routpoints.add(ll.LatLng(double.parse(lat1[1]),
+                                    double.parse(long1[0])));
+                              }
+                              isVisible = !isVisible;
+                              print("routes point : $routpoints");
+                            });
                           }
                           controller.isLoading.value = false;
                         },
@@ -408,155 +425,88 @@ class _HomeViewState extends State<HomeView> {
                       color: Colors.grey,
                       child: Visibility(
                           visible: locationData != null,
-                          child: isMaps == false
-                              ? fm.FlutterMap(
-                                  options: fm.MapOptions(
-                                    center: ll.LatLng(locationData!.latitude!,
+                          child: fm.FlutterMap(
+                            options: fm.MapOptions(
+                              center: ll.LatLng(locationData!.latitude!,
+                                  locationData!.longitude!),
+                              zoom: 15,
+                            ),
+                            nonRotatedChildren: [
+                              fm.AttributionWidget.defaultWidget(
+                                  source: 'OpenStreetMap contributors',
+                                  onSourceTapped: null),
+                            ],
+                            children: [
+                              fm.TileLayer(
+                                urlTemplate:
+                                    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                userAgentPackageName: 'com.example.app',
+                              ),
+                              fm.MarkerLayer(
+                                markers: [
+                                  fm.Marker(
+                                    point: ll.LatLng(locationData!.latitude!,
                                         locationData!.longitude!),
-                                    zoom: 15,
+                                    width: 100,
+                                    height: 100,
+                                    builder: (context) {
+                                      return const Icon(
+                                        Icons.location_on,
+                                        color: Colors.red,
+                                        size: 50,
+                                      );
+                                    },
                                   ),
-                                  nonRotatedChildren: [
-                                    fm.AttributionWidget.defaultWidget(
-                                        source: 'OpenStreetMap contributors',
-                                        onSourceTapped: null),
-                                  ],
-                                  children: [
-                                    fm.TileLayer(
-                                      urlTemplate:
-                                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                                      userAgentPackageName: 'com.example.app',
-                                    ),
-                                    fm.MarkerLayer(
-                                      markers: [
-                                        fm.Marker(
-                                          point: ll.LatLng(
-                                              locationData!.latitude!,
-                                              locationData!.longitude!),
-                                          width: 100,
-                                          height: 100,
-                                          builder: (context) {
-                                            return const Icon(
-                                              Icons.location_on,
-                                              color: Colors.red,
-                                              size: 50,
-                                            );
-                                          },
-                                        ),
-                                        if (dLoc != null)
-                                          fm.Marker(
-                                            point: ll.LatLng(dLoc!.latitude,
-                                                dLoc!.longitude),
-                                            width: 100,
-                                            height: 100,
-                                            builder: (context) {
-                                              return const Icon(
-                                                Icons.location_on,
-                                                color: Colors.red,
-                                                size: 50,
-                                              );
-                                            },
-                                          )
-                                      ],
-                                    ),
-                                    fm.PolylineLayer(
-                                      polylineCulling: false,
-                                      polylines: [
-                                        fm.Polyline(
-                                            points: routpoints,
-                                            color: Colors.blue,
-                                            strokeWidth: 8)
-                                      ],
-                                    )
-                                  ],
-                                )
-                              : locationData != null || currentP != null
-                                  ? GoogleMap(
-                                      onMapCreated:
-                                          ((GoogleMapController controller) =>
-                                              mapController
-                                                  .complete(controller)),
-                                      initialCameraPosition: CameraPosition(
-                                          target: LatLng(
-                                            locationData!.latitude!,
-                                            locationData!.longitude!,
-                                          ),
-                                          zoom: 13),
-                                      markers: {
-                                        if (currentP != null)
-                                          Marker(
-                                            markerId: const MarkerId("current"),
-                                            icon:
-                                                BitmapDescriptor.defaultMarker,
-                                            infoWindow: const InfoWindow(
-                                                title: "Your Current Location"),
-                                            position: currentP!,
-                                          ),
-                                        Marker(
-                                          markerId: const MarkerId("source"),
-                                          icon: BitmapDescriptor.defaultMarker,
-                                          infoWindow: const InfoWindow(
-                                              title: "Your Starting Location"),
-                                          position: LatLng(
-                                            locationData!.latitude!,
-                                            locationData!.longitude!,
-                                          ),
-                                        ),
-                                        if (dLoc != null)
-                                          Marker(
-                                              markerId:
-                                                  const MarkerId("destination"),
-                                              icon: BitmapDescriptor
-                                                  .defaultMarker,
-                                              infoWindow: const InfoWindow(
-                                                  title:
-                                                      "Your Destination Location"),
-                                              position: LatLng(dLoc!.latitude,
-                                                  dLoc!.longitude))
+                                  if (dLoc != null)
+                                    fm.Marker(
+                                      point: ll.LatLng(
+                                          dLoc!.latitude, dLoc!.longitude),
+                                      width: 100,
+                                      height: 100,
+                                      builder: (context) {
+                                        return const Icon(
+                                          Icons.location_on,
+                                          color: Colors.red,
+                                          size: 50,
+                                        );
                                       },
-                                      // polylines: dLoc != null ? Set<Polyline>.of(polylines.values) : Set<Polyline>.of(null) ,
                                     )
-                                  : const Center(
-                                      child: CircularProgressIndicator(
-                                        color: Colors.indigo,
-                                      ),
-                                    )),
+                                ],
+                              ),
+                              fm.PolylineLayer(
+                                polylineCulling: false,
+                                polylines: [
+                                  fm.Polyline(
+                                      points: routpoints,
+                                      color: Colors.blue,
+                                      strokeWidth: 8)
+                                ],
+                              )
+                            ],
+                          )),
                     )
                   : const Center(
                       child: CircularProgressIndicator(
                         color: Colors.indigo,
                       ),
                     ),
-              if (locationData != null)
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      isMaps = !isMaps;
-                    });
-                    print(isMaps);
-                  },
-                  child: Container(
-                    color: whiteColor,
-                    height: 50,
-                    width: MediaQuery.of(context).size.width,
-                  ),
-                )
             ],
           ),
         ));
   }
 
-  loc.LocationData? locationData, destinationData;
-  List<Placemark>? placemark, placemarkDestination;
+  loc.LocationData? locationData;
+  List<Placemark>? placemark;
   LatLng? dLoc;
   LatLng? currentP = null;
 
-  Map<PolylineId, Polyline> polylines = {};
   List<ll.LatLng> routpoints = [];
 
   final Completer<GoogleMapController> mapController =
       Completer<GoogleMapController>();
   loc.Location locationController = loc.Location();
   bool isVisible = false;
+
   void getPermission() async {
     if (await Permission.location.isGranted) {
       getLocation();
@@ -579,76 +529,6 @@ class _HomeViewState extends State<HomeView> {
   void getAddress() async {
     placemark = await placemarkFromCoordinates(
         locationData!.latitude!, locationData!.longitude!);
-  }
-
-  Future<void> getLocationUpdates() async {
-    bool serviceEnable;
-    loc.PermissionStatus permissionStatus;
-
-    serviceEnable = await locationController.serviceEnabled();
-    if (serviceEnable) {
-      serviceEnable = await locationController.requestService();
-    } else {
-      return;
-    }
-
-    permissionStatus = await locationController.hasPermission();
-    // ignore: unrelated_type_equality_checks
-    if (permissionStatus == PermissionStatus.denied) {
-      permissionStatus = await locationController.requestPermission();
-      // ignore: unrelated_type_equality_checks
-      if (permissionStatus != PermissionStatus.granted) {
-        return;
-      }
-    }
-
-    locationController.onLocationChanged.listen((loc.LocationData currLoc) {
-      if (currLoc.latitude != null && currLoc.longitude != null) {
-        setState(() {
-          currentP = LatLng(currLoc.latitude!, currLoc.longitude!);
-          cameraToPosition(currentP!);
-        });
-      }
-    });
-  }
-
-  Future<void> cameraToPosition(LatLng pos) async {
-    final GoogleMapController controller = await mapController.future;
-    CameraPosition newCamera = CameraPosition(target: pos, zoom: 13);
-    await controller.animateCamera(CameraUpdate.newCameraPosition(newCamera));
-  }
-
-  Future<List<LatLng>> getPolylinesPoint() async {
-    List<LatLng> polyLinesCoordinate = [];
-    PolylinePoints polylinePoints = PolylinePoints();
-    PolylineResult polylineResult =
-        await polylinePoints.getRouteBetweenCoordinates(
-            "AIzaSyCVpnwmWfV8OKd8kAlgj_JqnjD-ME-OZMs",
-            PointLatLng(locationData!.latitude!, locationData!.longitude!),
-            PointLatLng(dLoc!.latitude, dLoc!.longitude),
-            travelMode: TravelMode.driving);
-    if (polylineResult.points.isNotEmpty) {
-      polylineResult.points.forEach((PointLatLng p) {
-        polyLinesCoordinate.add(LatLng(p.latitude, p.longitude));
-      });
-    } else {
-      print(polylineResult.errorMessage);
-    }
-    return polyLinesCoordinate;
-  }
-
-  void generatedPolilyneFromPoint(List<LatLng> polyLinesCoordinate) async {
-    PolylineId id = const PolylineId("poly");
-    Polyline polyline = Polyline(
-      polylineId: id,
-      color: Colors.blue,
-      points: polyLinesCoordinate,
-      width: 8,
-    );
-    setState(() {
-      polylines[id] = polyline;
-      print("oke");
-    });
   }
 
   void showPopupMenu(BuildContext context) {

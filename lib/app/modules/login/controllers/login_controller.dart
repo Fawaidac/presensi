@@ -25,17 +25,6 @@ class LoginController extends GetxController {
     }
   }
 
-  void loginUser(String email, String password) async {
-    User? user = await firebaseAuthServices.login(email, password);
-
-    if (user != null) {
-      Get.offAllNamed(Routes.HOME);
-      Get.snackbar("Sign-In Success", "Login successful");
-    } else {
-      Get.snackbar("Sign-In Failed", "Some error happend");
-    }
-  }
-
   void signIn(String email, String password) async {
     controller.signInWithEmailAndPassword(email, password);
   }

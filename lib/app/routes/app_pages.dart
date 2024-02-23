@@ -8,8 +8,6 @@ import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
 import '../modules/register/bindings/register_binding.dart';
 import '../modules/register/views/register_view.dart';
-import '../modules/wellcome/bindings/wellcome_binding.dart';
-import '../modules/wellcome/views/wellcome_view.dart';
 
 part 'app_routes.dart';
 
@@ -23,11 +21,6 @@ class AppPages {
       name: _Paths.HOME,
       page: () => HomeView(),
       binding: HomeBinding(),
-    ),
-    GetPage(
-      name: _Paths.WELLCOME,
-      page: () => WellcomeView(),
-      binding: WellcomeBinding(),
     ),
     GetPage(
       name: _Paths.LOGIN,

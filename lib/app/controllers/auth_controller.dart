@@ -44,6 +44,7 @@ class AuthController extends GetxController {
     try {
       await auth.createUserWithEmailAndPassword(
           email: email, password: password);
+
       await userController.createUser(UserModel(
           fullname: fullname, email: email, telp: telp, password: password));
       Get.toNamed(Routes.LOGIN);
@@ -55,6 +56,4 @@ class AuthController extends GetxController {
       }
     }
   }
-
-  Future<void> logout() async => await auth.signOut();
 }
