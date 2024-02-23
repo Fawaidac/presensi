@@ -11,6 +11,7 @@ import '../controllers/profile_controller.dart';
 class ProfileView extends GetView<ProfileController> {
   ProfileView({Key? key}) : super(key: key);
 
+  @override
   final controller = Get.put(ProfileController());
 
   @override

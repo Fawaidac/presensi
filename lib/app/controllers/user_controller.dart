@@ -23,6 +23,18 @@ class UserController extends GetxController {
   }
 
   Future<void> updateUserProfile(UserModel userModel) async {
-    await _db.collection("Users").doc(userModel.id).update(userModel.toJson());
+    final snapshot = await _db
+        .collection("Users")
+        .where("email", isEqualTo: userModel.email)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      final docId = snapshot.docs.first.id;
+      await _db.collection("Users").doc(docId).update(userModel.toJson());
+      Get.snackbar("Success", "Update profile is successfully");
+      Get.back();
+    } else {
+      print("User with email ${userModel.email} not found.");
+    }
   }
 }
