@@ -5,6 +5,7 @@ import 'package:presensi/model/user.dart';
 class UserController extends GetxController {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
+  //create user to database
   Future<void> createUser(UserModel userModel) async {
     try {
       await _db.collection("Users").add(userModel.toJson());
@@ -15,6 +16,7 @@ class UserController extends GetxController {
     }
   }
 
+  //get user daya in profie
   Future<UserModel> getUserDetail(String email) async {
     final snapshot =
         await _db.collection("Users").where("email", isEqualTo: email).get();
@@ -22,6 +24,7 @@ class UserController extends GetxController {
     return userData;
   }
 
+  //update profile
   Future<void> updateUserProfile(UserModel userModel) async {
     final snapshot = await _db
         .collection("Users")
